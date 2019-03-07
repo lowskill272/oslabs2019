@@ -15,6 +15,7 @@ void testRevertString(void) {
 
   RevertString(str_with_spaces);
   CU_ASSERT_STRING_EQUAL_FATAL(str_with_spaces, "secaps htiw gnirtS");
+  
 
   RevertString(str_with_odd_chars_num);
   CU_ASSERT_STRING_EQUAL_FATAL(str_with_odd_chars_num, "cba");
