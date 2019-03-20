@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 
   struct timeval start_time;
   gettimeofday(&start_time, NULL);
-
+  int rt;
   for (int i = 0; i < pnum; i++) {
     pid_t child_pid = fork();
     if (child_pid >= 0) {
@@ -98,11 +98,39 @@ int main(int argc, char **argv) {
       active_child_processes += 1;
       if (child_pid == 0) {
         // child process
-
+        int buf;
+        if(i%2==0){
+            buf=INT_MIN;
+            for(int j=0;j<array_size;j++)
+            {
+                if(buf<array[j])
+                    buf=array[j];
+            }
+        }
+        else{
+            buf=INT_MAX;
+            for(int j=0;j<array_size;j++)
+            {
+                if(buf>array[j])
+                    buf=array[j];
+            }
+        }
         // parallel somehow
 
         if (with_files) {
           // use files here
+          if(i%2==0){
+              FILE *fp=fopen("MaxFile.txt","w");
+              fprintf(fp,"%d",buf);
+              fclose(fp);
+              exit(rt);
+          }
+          else{
+              FILE *fp=fopen("MinFile.txt","w");
+              fprintf(fp,"%d",buf);
+              fclose(fp);
+              exit(rt);
+          }
         } else {
           // use pipe here
         }
@@ -117,7 +145,9 @@ int main(int argc, char **argv) {
 
   while (active_child_processes > 0) {
     // your code here
-
+    wait(0);
+    printf("hi\n");
+    //
     active_child_processes -= 1;
   }
 
@@ -128,9 +158,21 @@ int main(int argc, char **argv) {
   for (int i = 0; i < pnum; i++) {
     int min = INT_MAX;
     int max = INT_MIN;
-
     if (with_files) {
-      // read from files
+      //read from files
+      if(i%2==0){
+              FILE *fp=fopen("MaxFile.txt","r");
+             // printf("%d\n",max);
+              fscanf(fp,"%d",&max);
+              fclose(fp);
+          }
+          else{
+              FILE *fp=fopen("MinFile.txt","r");
+             // printf("%d\n",min);
+              fscanf(fp,"%d",&min);
+              fclose(fp);
+          }
+      //
     } else {
       // read from pipes
     }
