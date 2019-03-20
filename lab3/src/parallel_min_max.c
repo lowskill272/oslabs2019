@@ -90,7 +90,12 @@ int main(int argc, char **argv) {
 
   struct timeval start_time;
   gettimeofday(&start_time, NULL);
+  //
   int rt;
+  int pipeid[4];
+  int pipeFlag=pipe(pipeid);
+  pipe(pipeid+2);
+  //
   for (int i = 0; i < pnum; i++) {
     pid_t child_pid = fork();
     if (child_pid >= 0) {
@@ -123,17 +128,34 @@ int main(int argc, char **argv) {
               FILE *fp=fopen("MaxFile.txt","w");
               fprintf(fp,"%d",buf);
               fclose(fp);
-              exit(rt);
           }
           else{
               FILE *fp=fopen("MinFile.txt","w");
               fprintf(fp,"%d",buf);
               fclose(fp);
-              exit(rt);
           }
         } else {
           // use pipe here
+          if(pipeFlag!=-1){
+              if(i%2==0){
+                  close(pipeid[0]);
+                  write(pipeid[1],&buf,sizeof(buf));
+                  //printf("max w %d\n",buf);
+                  close(pipeid[1]);
+              }
+              else{
+                  close(pipeid[2]);
+                  write(pipeid[3],&buf,sizeof(buf));
+                 // printf("min w %d\n",buf);
+                  close(pipeid[3]);
+              }
+          }else{
+              printf("Pipe dont work");
+              return -1;
+          }
+          //
         }
+        exit(rt);
         return 0;
       }
 
@@ -146,7 +168,6 @@ int main(int argc, char **argv) {
   while (active_child_processes > 0) {
     // your code here
     wait(0);
-    printf("hi\n");
     //
     active_child_processes -= 1;
   }
@@ -175,6 +196,19 @@ int main(int argc, char **argv) {
       //
     } else {
       // read from pipes
+      if(i%2==0){
+        close(pipeid[1]);
+        read(pipeid[0],&max,sizeof(int));
+       // printf("max r %d\n",max);
+        close(pipeid[0]);
+      }
+      else{
+        close(pipeid[3]);
+        read(pipeid[2],&min,sizeof(int));
+        //printf("min r %d\n",min);
+        close(pipeid[2]);
+      }
+      //
     }
 
     if (min < min_max.min) min_max.min = min;
