@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "zad5.h"
-
 int main(void)
 {
     execl("sequential_min_max"," ","10","100",NULL);
